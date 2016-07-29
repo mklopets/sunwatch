@@ -4,8 +4,13 @@ const request = require('request-promise');
 
 const Logger = function(about) {
     this.about = about;
+    this.jobs = [];
+    this.finish = () => {
+        return Promise.all(this.jobs);
+    };
     this.log = function(logData) {
         console.log(logData);
+        const message = JSON.stringify(logData);
         const baseUri = 'http://fuckaws.xyz:4242/api';
         const options = {
             uri: baseUri,
@@ -13,14 +18,16 @@ const Logger = function(about) {
             body: {
                 logs: [
                     {
-                        message: logData,
+                        message: message,
                         about: this.about
                     }
                 ]
             },
             json: true
         };
-        return request(options);
+        const req = request(options);
+        this.jobs.push(req);
+        return req;
     };
 };
 
